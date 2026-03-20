@@ -31,7 +31,7 @@ def require_existing_directory(path: Path, description: str) -> None:
         raise FileNotFoundError(f"{description} не найдена: {path}")
 
 
-def require_solution_contract(solution_dir: Path) -> tuple[Path, Path]:
+def require_solution_entrypoints(solution_dir: Path) -> tuple[Path, Path]:
     """Проверяет наличие обязательных скриптов compress.py и decompress.py в решении.
     
     Args:

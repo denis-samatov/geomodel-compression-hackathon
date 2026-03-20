@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 from pathlib import Path
 
@@ -24,17 +25,19 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_rows(csv_path: Path) -> list[dict[str, str]]:
+def load_rows(csv_path: Path) -> tuple[list[dict[str, str]], list[str]]:
     """Читает CSV-файл таблицы, сортирует по результату и пересчитывает ранги.
     
     Args:
         csv_path (Path): Путь к файлу `current.csv`.
         
     Returns:
-        list[dict[str, str]]: Отсортированный список словарей (с обновленными `rank`).
+        tuple[list[dict[str, str]], list[str]]: Отсортированные строки и исходные fieldnames.
     """
     with csv_path.open("r", encoding="utf-8", newline="") as handle:
-        rows = list(csv.DictReader(handle))
+        reader = csv.DictReader(handle)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
     for row in rows:
         score = row.get("best_public_score", "").strip()
         row["_score_sort"] = float(score) if score else float("-inf")
@@ -42,7 +45,18 @@ def load_rows(csv_path: Path) -> list[dict[str, str]]:
     for index, row in enumerate(rows, start=1):
         row["rank"] = str(index)
         row.pop("_score_sort", None)
-    return rows
+    return rows, fieldnames
+
+
+def serialize_csv(fieldnames: list[str], rows: list[dict[str, str]]) -> str:
+    """Сериализует нормализованные строки обратно в CSV."""
+    if not fieldnames:
+        return ""
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue()
 
 
 def main() -> int:
@@ -55,14 +69,19 @@ def main() -> int:
     csv_path = Path(args.csv).resolve()
     json_path = Path(args.json).resolve()
 
-    rows = load_rows(csv_path)
+    rows, fieldnames = load_rows(csv_path)
+    normalized_csv = serialize_csv(fieldnames, rows)
     normalized_json = json.dumps(rows, indent=2, ensure_ascii=False) + "\n"
 
     if args.check:
+        existing_csv = csv_path.read_text(encoding="utf-8") if csv_path.exists() else ""
         existing = json_path.read_text(encoding="utf-8") if json_path.exists() else ""
+        if existing_csv != normalized_csv:
+            raise SystemExit("CSV таблицы результатов не нормализован")
         if existing != normalized_json:
             raise SystemExit("JSON таблицы результатов не синхронизирован с CSV")
     else:
+        csv_path.write_text(normalized_csv, encoding="utf-8")
         json_path.write_text(normalized_json, encoding="utf-8")
     return 0
 

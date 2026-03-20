@@ -373,8 +373,8 @@ def find_result_files(case_dir: Path, model_stem: str) -> list[str]:
     """
     Находит результирующие файлы tNavigator в директории RESULTS.
     
-    Ищет файлы с расширением .res в директории {case_dir}/RESULTS/{model_stem}
-    и возвращает их отсортированные по времени модификации.
+    Ищет файлы `result.*` в директории `{case_dir}/RESULTS/{model_stem}`
+    и возвращает их отсортированными по времени модификации.
     
     Args:
         case_dir (Path): Корневая директория случая (модели).
@@ -391,7 +391,7 @@ def find_result_files(case_dir: Path, model_stem: str) -> list[str]:
     if not results_run_dir.exists():
         return []
 
-    # Ищем все файлы с расширением .res и сортируем по времени модификации
+    # Ищем все файлы result.* и сортируем по времени модификации
     files = sorted(results_run_dir.glob("result.*"), key=lambda path: path.stat().st_mtime)
     
     # Преобразуем пути в строки и возвращаем
@@ -477,6 +477,7 @@ def derive_final_status(
     returncode: Optional[int],
     model_read_status: Optional[ModelReadStatus],
     general_status: Optional[str],
+    stdout_text: str,
     stderr_text: str,
     result_log_summary: Optional[ResultLogSummary],
     run_mode: str,
@@ -501,6 +502,7 @@ def derive_final_status(
         returncode (Optional[int]): Код возврата процесса (None если timeout).
         model_read_status (Optional[ModelReadStatus]): Статус чтения модели.
         general_status (Optional[str]): Общий статус tNavigator.
+        stdout_text (str): Текст stdout для анализа дополнительных предупреждений.
         stderr_text (str): Текст stderr для анализа ошибок и предупреждений.
         result_log_summary (Optional[ResultLogSummary]): Разбор журнала `result.log`.
         run_mode (str): Режим запуска tNavigator.
@@ -536,7 +538,8 @@ def derive_final_status(
         notes.append(f"общий статус tNavigator не OK: {general_status}")
         return "failed", notes
 
-    # Подсчитываем ошибки и предупреждения в stderr
+    # Подсчитываем предупреждения и ошибки в stdout/stderr
+    stdout_warning_count = count_warnings(stdout_text)
     stderr_warning_count = count_warnings(stderr_text)
     stderr_error_count = count_errors(stderr_text)
 
@@ -571,6 +574,7 @@ def derive_final_status(
     # Проверка 7: есть предупреждения (из MODEL READ STATUS или stderr)
     if (
         model_read_status.warnings > 0
+        or stdout_warning_count > 0
         or stderr_warning_count > 0
         or (
             result_log_summary is not None
@@ -583,6 +587,7 @@ def derive_final_status(
         notes.append(
             "обнаружены предупреждения: "
             f"model_read={model_read_status.warnings}, "
+            f"stdout={stdout_warning_count}, "
             f"stderr={stderr_warning_count}, "
             f"result_log={(result_log_summary.warnings if result_log_summary else 0)}"
         )
@@ -749,6 +754,7 @@ def run_tnavigator_check(
         returncode=return_code,
         model_read_status=model_read_status,
         general_status=general_status,
+        stdout_text=stdout_text,
         stderr_text=stderr_text,
         result_log_summary=result_log_summary,
         run_mode=run_mode,

@@ -10,18 +10,20 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from contract_checks import (
+from solution_requirements import (
     ensure_restored_model_not_empty,
     require_existing_directory,
     require_existing_file,
-    require_solution_contract,
+    require_solution_entrypoints,
 )
 from metrics import (
     build_manifest,
     compression_ratio,
+    compression_score,
+    compute_structure_metrics,
     exact_match_ratio,
     public_score,
-    structure_recall,
+    runtime_score,
     total_size_bytes,
 )
 from tnavigator_check import run_tnavigator_check
@@ -147,7 +149,7 @@ def main() -> int:
 
     if args.solution_dir:
         solution_dir = Path(args.solution_dir).resolve()
-        compress_script, decompress_script = require_solution_contract(solution_dir)
+        compress_script, decompress_script = require_solution_entrypoints(solution_dir)
 
         if archive_path is None:
             archive_path = workdir / "artifact.tar.gz"
@@ -217,20 +219,37 @@ def main() -> int:
     model_size = total_size_bytes([path for path in model_dir.rglob("*")])
     archive_size = archive_path.stat().st_size
     ratio = compression_ratio(model_size, archive_size)
-    structure = structure_recall(original_manifest, restored_manifest)
+    structure_metrics = compute_structure_metrics(
+        original_manifest,
+        restored_manifest,
+        model_dir,
+        restored_dir,
+        tnavigator_final_status=tnavigator_check["final_status"] if tnavigator_check else None,
+    )
+    structure = structure_metrics.structure_integrity
     exact = exact_match_ratio(original_manifest, restored_manifest, model_dir, restored_dir)
 
-    total_runtime = 0.0
-    if compress_result:
-        total_runtime += compress_result.duration_seconds
-    if decompress_result:
-        total_runtime += decompress_result.duration_seconds
+    compression_seconds = round(compress_result.duration_seconds, 4) if compress_result else None
+    decompression_seconds = round(decompress_result.duration_seconds, 4) if decompress_result else None
 
-    score = public_score(
-        compression_ratio_value=ratio,
-        structure_recall_value=structure,
-        exact_match_ratio_value=exact,
-        total_runtime_seconds=total_runtime,
+    runtime_seconds = None
+    if compress_result or decompress_result:
+        runtime_total = 0.0
+        if compress_result:
+            runtime_total += compress_result.duration_seconds
+        if decompress_result:
+            runtime_total += decompress_result.duration_seconds
+        runtime_seconds = round(runtime_total, 4)
+
+    score = (
+        public_score(
+            compression_ratio_value=ratio,
+            structure_integrity_value=structure,
+            exact_match_ratio_value=exact,
+            total_runtime_seconds=runtime_seconds,
+        )
+        if runtime_seconds is not None
+        else None
     )
 
     result = {
@@ -240,15 +259,30 @@ def main() -> int:
         "restored_model": str(restored_dir),
         "metrics": {
             "public_score": score,
+            "score_complete": runtime_seconds is not None,
             "compression_ratio": round(ratio, 4),
-            "compression_ratio_score": round(min(max((ratio - 1.0) / 9.0, 0.0), 1.0) * 100.0, 2),
-            "structure_recall": round(structure, 4),
+            "compression_ratio_score": round(compression_score(ratio), 2),
+            "structure_recall": round(structure_metrics.recall, 4),
+            "structure_precision": round(structure_metrics.precision, 4),
+            "structure_path_f1": round(structure_metrics.path_f1, 4),
+            "structure_root_data_score": round(structure_metrics.root_data_score, 4),
+            "structure_include_graph_score": round(structure_metrics.include_graph_score, 4),
+            "tnavigator_structure_score": (
+                round(structure_metrics.tnavigator_score, 4)
+                if structure_metrics.tnavigator_score is not None
+                else None
+            ),
+            "structure_integrity": round(structure, 4),
             "exact_match_ratio": round(exact, 4),
+            "content_accuracy": round(exact, 4),
             "model_size_bytes": model_size,
             "archive_size_bytes": archive_size,
             "file_count_original": len(original_manifest),
             "file_count_restored": len(restored_manifest),
-            "runtime_seconds": round(total_runtime, 4),
+            "compression_seconds": compression_seconds,
+            "decompression_seconds": decompression_seconds,
+            "runtime_seconds": runtime_seconds,
+            "runtime_score": round(runtime_score(runtime_seconds), 2) if runtime_seconds is not None else None,
         },
         "commands": {
             "compress": asdict(compress_result) if compress_result else None,

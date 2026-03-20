@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "rank": "1",
+    "team_name": "baseline-tar-gz-full-copy",
+    "best_public_score": "91.26",
+    "compression_ratio": "3.2247",
+    "runtime_bucket": "60-120s",
+    "last_valid_submission_at": "2026-03-20T12:41:15+0700"
+  }
+]
