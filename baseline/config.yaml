@@ -5,7 +5,7 @@ baseline:
   method: tar-gz-full-copy
   description: Минимально валидное эталонное решение, сохраняющее всё дерево модели без предметно-ориентированного сжатия.
   guarantees:
-    - contract-compliance
+    - requirements-compliance
     - full-tree-preservation
     - stdlib-only
     - no-network
