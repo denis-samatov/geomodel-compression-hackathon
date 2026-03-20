@@ -1,0 +1,52 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Ошибка в документации, скриптах, baseline или репозиторной логике"
+  },
+  {
+    "name": "data",
+    "color": "1d76db",
+    "description": "Проблема с public data, ссылкой на скачивание или layout модели"
+  },
+  {
+    "name": "evaluator",
+    "color": "5319e7",
+    "description": "Проблема с public evaluator, оценкой или контрактными проверками"
+  },
+  {
+    "name": "question",
+    "color": "d876e3",
+    "description": "Вопрос по правилам, документации или процессу подачи решения"
+  },
+  {
+    "name": "documentation",
+    "color": "0e8a16",
+    "description": "Изменение или проблема документации для участников"
+  },
+  {
+    "name": "baseline",
+    "color": "0052cc",
+    "description": "Изменение, вопрос или проблема в reference baseline"
+  },
+  {
+    "name": "scripts",
+    "color": "bfd4f2",
+    "description": "Вспомогательные скрипты, packaging и tooling"
+  },
+  {
+    "name": "leaderboard",
+    "color": "fbca04",
+    "description": "Public leaderboard, snapshots и логика публикации"
+  },
+  {
+    "name": "workflow",
+    "color": "c2e0c6",
+    "description": "GitHub workflows, issue forms и repo automation"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "Улучшение репозитория для участников"
+  }
+]

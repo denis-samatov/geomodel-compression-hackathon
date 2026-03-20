@@ -1,0 +1,84 @@
+name: Сообщение об ошибке
+description: Сообщить о баге в документации, скриптах, `baseline` или логике репозитория.
+title: "[Ошибка] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Используйте этот шаблон для багов в репозитории для участников.
+        Если проблема касается только вашего собственного решения, сначала проверьте `docs/`, раздел часто задаваемых вопросов и `public_evaluator/`.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Где находится проблема?
+      options:
+        - README / docs
+        - baseline
+        - public_evaluator
+        - scripts
+        - leaderboard
+        - submission_template
+        - Метаданные GitHub / автоматические процессы
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Краткое описание
+      description: Что именно сломано?
+      placeholder: При запуске ..., при открытии ..., при проверке ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      description: Укажите шаги, входные данные и команды.
+      placeholder: |
+        1. Открыть ...
+        2. Запустить ...
+        3. Получить ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Окружение
+      description: Укажите ОС, версию Python и при необходимости путь или контекст запуска.
+      placeholder: macOS 15, Python 3.12, запуск через ...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи или скриншоты
+      description: Вставьте описание ошибки, вывод `stdout`/`stderr` или приложите изображение.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Предварительная проверка
+      options:
+        - label: Я проверил README и соответствующий раздел в docs/
+          required: true
+        - label: Я убедился, что проблема воспроизводится на актуальном `main`
+          required: true

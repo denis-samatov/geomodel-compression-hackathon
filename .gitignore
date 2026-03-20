@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.evaluator-workdir/
+.DS_Store
+data/public/
+*.tar.gz.metadata.json
+
+data/

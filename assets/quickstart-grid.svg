@@ -1,0 +1,60 @@
+<svg width="1280" height="484" viewBox="0 0 1280 484" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Сетка быстрого старта</title>
+  <desc id="desc">Визуальная карта быстрого старта по документации для участников.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="484" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#E5EEF9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="484" rx="28" fill="url(#bg)"/>
+
+  <!-- Верхний ряд: 4 карточки -->
+  <rect x="38" y="38" width="274" height="160" rx="22" fill="#FFFFFF" stroke="#D6E3F8"/>
+  <rect x="330" y="38" width="274" height="160" rx="22" fill="#FFFFFF" stroke="#D6E3F8"/>
+  <rect x="622" y="38" width="274" height="160" rx="22" fill="#FFFFFF" stroke="#D6E3F8"/>
+  <rect x="914" y="38" width="328" height="160" rx="22" fill="#FFFFFF" stroke="#D6E3F8"/>
+
+  <!-- Нижний ряд: 2 темные карточки -->
+  <rect x="38" y="218" width="568" height="222" rx="22" fill="#0F172A"/>
+  <rect x="624" y="218" width="618" height="222" rx="22" fill="#111827"/>
+
+  <!-- Карточка 01 -->
+  <text x="68" y="78" fill="#94A3B8" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">01</text>
+  <text x="68" y="118" fill="#0F172A" font-family="JetBrains Mono, Consolas, monospace" font-size="22" font-weight="700">ЗАДАНИЕ</text>
+  <text x="68" y="148" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">Поймите задачу, цели</text>
+  <text x="68" y="168" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">и ограничения.</text>
+
+  <!-- Карточка 02 -->
+  <text x="360" y="78" fill="#94A3B8" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">02</text>
+  <text x="360" y="118" fill="#0F172A" font-family="JetBrains Mono, Consolas, monospace" font-size="22" font-weight="700">ПРАВИЛА</text>
+  <text x="360" y="148" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">Зафиксируйте правила</text>
+  <text x="360" y="168" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">до начала реализации.</text>
+
+  <!-- Карточка 03 -->
+  <text x="652" y="78" fill="#94A3B8" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">03</text>
+  <text x="652" y="118" fill="#0F172A" font-family="JetBrains Mono, Consolas, monospace" font-size="22" font-weight="700">ПОДАЧА</text>
+  <text x="652" y="148" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">Собирайте решение строго</text>
+  <text x="652" y="168" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">по структуре и интерфейсу.</text>
+
+  <!-- Карточка 04 -->
+  <text x="944" y="78" fill="#94A3B8" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">04</text>
+  <text x="944" y="118" fill="#0F172A" font-family="JetBrains Mono, Consolas, monospace" font-size="22" font-weight="700">ОЦЕНКА</text>
+  <text x="944" y="148" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">Опирайтесь на публичные</text>
+  <text x="944" y="168" fill="#475569" font-family="IBM Plex Sans, Arial, sans-serif" font-size="15">сигналы, а не вслепую.</text>
+
+  <!-- Обязательные команды -->
+  <text x="76" y="262" fill="#F8B84A" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">ОБЯЗАТЕЛЬНЫЕ КОМАНДЫ</text>
+  <text x="76" y="304" fill="#F8FAFC" font-family="JetBrains Mono, Consolas, monospace" font-size="20" font-weight="700">python compress.py</text>
+  <text x="76" y="332" fill="#F8FAFC" font-family="JetBrains Mono, Consolas, monospace" font-size="20" font-weight="700">  --input MODEL --output ARTIFACT</text>
+  <text x="76" y="366" fill="#F8FAFC" font-family="JetBrains Mono, Consolas, monospace" font-size="20" font-weight="700">python decompress.py</text>
+  <text x="76" y="394" fill="#F8FAFC" font-family="JetBrains Mono, Consolas, monospace" font-size="20" font-weight="700">  --input ARTIFACT --output RESTORED</text>
+
+  <!-- Зачем нужен репозиторий -->
+  <text x="662" y="262" fill="#F8B84A" font-family="IBM Plex Sans, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.2">ЗАЧЕМ НУЖЕН РЕПОЗИТОРИЙ</text>
+  <text x="662" y="304" fill="#F8FAFC" font-family="IBM Plex Sans, Arial, sans-serif" font-size="19" font-weight="600">Единый источник истины для задачи,</text>
+  <text x="662" y="334" fill="#F8FAFC" font-family="IBM Plex Sans, Arial, sans-serif" font-size="19" font-weight="600">правил, данных и логики ранжирования.</text>
+  <text x="662" y="372" fill="#CBD5E1" font-family="IBM Plex Sans, Arial, sans-serif" font-size="17">Если другой канал противоречит,</text>
+  <text x="662" y="396" fill="#CBD5E1" font-family="IBM Plex Sans, Arial, sans-serif" font-size="17">приоритет у репозитория.</text>
+</svg>

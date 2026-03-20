@@ -1,0 +1,67 @@
+name: Проблема с оценщиком / оценкой
+description: Сообщить о проблеме с локальным публичным оценщиком, подсчетом баллов или контрактными проверками.
+title: "[Оценщик] "
+labels:
+  - evaluator
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Этот шаблон только для проблем с `public_evaluator/`, быстрой проверкой в `baseline` и контрактными проверками.
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Что именно вызывает проблему?
+      options:
+        - public_evaluator/evaluate.py
+        - расчёт метрик
+        - контрактные проверки
+        - интеграция с `baseline`
+        - проверка снимка лидерборда
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Команда запуска
+      description: Вставьте точную команду, которую вы запускали.
+      placeholder: python public_evaluator/evaluate.py --model ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Что произошло
+      placeholder: оценщик завершился с ошибкой, оценка выглядит неверной, контрактная проверка работает не так ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что ожидалось
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи
+      description: Вставьте `stderr`/`stdout` или путь к журналам из рабочего каталога оценщика.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Предварительная проверка
+      options:
+        - label: Я проверил docs/evaluation.md
+          required: true
+        - label: Я проверил public_evaluator/README.md
+          required: true
+        - label: Я могу воспроизвести проблему повторно
+          required: true

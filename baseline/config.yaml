@@ -1,0 +1,12 @@
+baseline:
+  name: baseline-tar-gz-full-copy
+  version: 1.0.0
+  category: reference-solution
+  method: tar-gz-full-copy
+  description: Минимально валидное эталонное решение, сохраняющее всё дерево модели без предметно-ориентированного сжатия.
+  guarantees:
+    - contract-compliance
+    - full-tree-preservation
+    - stdlib-only
+    - no-network
+    - evaluator-compatible

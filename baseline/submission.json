@@ -1,0 +1,14 @@
+{
+  "solution_name": "baseline-tar-gz-full-copy",
+  "solution_type": "reference-baseline",
+  "version": "1.0.0",
+  "entrypoints": {
+    "compress": "compress.py",
+    "decompress": "decompress.py"
+  },
+  "runtime": {
+    "python": "3.10+",
+    "dependencies": "standard-library-only"
+  },
+  "notes": "Минимально валидное базовое решение для проверки соответствия контракту и быстрой проверки оценщиком."
+}

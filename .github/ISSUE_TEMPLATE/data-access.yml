@@ -1,0 +1,59 @@
+name: Проблема с доступом к данным
+description: Сообщить о проблеме со ссылкой на публичные данные, архивом или описанием структуры модели.
+title: "[Данные] "
+labels:
+  - data
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Используйте этот шаблон для проблем с публичными данными, ссылкой на Google Drive и описанием структуры модели.
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Тип проблемы
+      options:
+        - Битая ссылка на скачивание
+        - Архив не скачивается или повреждён
+        - Несовпадение структуры папок
+        - Неоднозначность в документации
+    validations:
+      required: true
+
+  - type: input
+    id: dataset_id
+    attributes:
+      label: Идентификатор набора данных / имя файла
+      placeholder: public-model-01 / model_a.tar.zst
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Описание проблемы
+      placeholder: Ссылка не открывается, архив не распаковывается, структура каталогов не соответствует docs ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Где именно это указано
+      description: Ссылка на документ или раздел, если знаете.
+      placeholder: docs/data-format.md, README.md
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Что вы уже проверили
+      placeholder: Открыл официальную ссылку, скачал архив, сравнил структуру каталогов с docs/data-format.md ...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Предварительная проверка
+      options:
+        - label: Я проверил docs/data-format.md
+          required: true
+        - label: Я попробовал скачать модель по официальной ссылке
+          required: true

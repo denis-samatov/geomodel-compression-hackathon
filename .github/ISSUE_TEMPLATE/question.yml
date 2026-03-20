@@ -1,0 +1,55 @@
+name: Вопрос по правилам / документации
+description: Задать вопрос по правилам, документации, структуре репозитория или процессу подачи решения.
+title: "[Вопрос] "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Используйте этот шаблон, если в документации остается неоднозначность и вам нужен официальный ответ.
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Тема вопроса
+      options:
+        - Спецификация задания
+        - Правила участия
+        - Контракт подачи решения
+        - Логика оценки
+        - Формат данных
+        - Таймлайн
+        - README / навигация по репозиторию
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Вопрос
+      placeholder: Что именно остается неясным?
+    validations:
+      required: true
+
+  - type: textarea
+    id: docs_ref
+    attributes:
+      label: На какой документ вы ссылаетесь
+      placeholder: docs/rules.md, README.md, docs/submission.md ...
+
+  - type: textarea
+    id: interpretation
+    attributes:
+      label: Как вы сейчас это понимаете
+      description: Помогает ответить точнее и увидеть двусмысленность в текущем тексте.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Предварительная проверка
+      options:
+        - label: Я уже проверил README и соответствующий раздел docs/
+          required: true
+        - label: Я уже посмотрел раздел часто задаваемых вопросов
+          required: true

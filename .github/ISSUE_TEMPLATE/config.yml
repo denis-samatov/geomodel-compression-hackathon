@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Официальный README
+    url: https://github.com/denis-samatov/geomodel-compression-hackathon
+    about: Сначала проверьте корневой README и официальную навигацию для участников.
+  - name: FAQ по заданию
+    url: https://github.com/denis-samatov/geomodel-compression-hackathon/blob/main/docs/faq.md
+    about: Здесь уже собраны ответы на типовые вопросы по правилам, подаче решения и таблице результатов.
+  - name: Логика оценки
+    url: https://github.com/denis-samatov/geomodel-compression-hackathon/blob/main/docs/evaluation.md
+    about: Перед репортом проблем с оценкой проверьте public/private логику и hard gates.
+  - name: Формат данных
+    url: https://github.com/denis-samatov/geomodel-compression-hackathon/blob/main/docs/data-format.md
+    about: Перед вопросом по структуре данных проверьте формат данных и прямую ссылку на публичную модель.

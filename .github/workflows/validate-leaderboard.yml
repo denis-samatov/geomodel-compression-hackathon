@@ -1,0 +1,35 @@
+name: Проверка Лидерборда
+
+on:
+  push:
+    paths:
+      - "leaderboard/current.csv"
+      - "leaderboard/current.json"
+      - "leaderboard/update_leaderboard.py"
+      - ".github/workflows/validate-leaderboard.yml"
+  pull_request:
+    paths:
+      - "leaderboard/current.csv"
+      - "leaderboard/current.json"
+      - "leaderboard/update_leaderboard.py"
+      - ".github/workflows/validate-leaderboard.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Клонирование репозитория
+        uses: actions/checkout@v4
+
+      - name: Настройка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Проверка снимков лидерборда
+        run: |
+          python3 leaderboard/update_leaderboard.py \
+            --csv leaderboard/current.csv \
+            --json leaderboard/current.json \
+            --check
