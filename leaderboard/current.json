@@ -1,10 +1,26 @@
 [
   {
     "rank": "1",
+    "team_name": "TomskPolitechnical",
+    "best_public_score": "97.40",
+    "compression_ratio": "6.3400",
+    "runtime_bucket": "120-300s",
+    "last_valid_submission_at": "2026-05-25T07:38:00+0300"
+  },
+  {
+    "rank": "2",
     "team_name": "baseline-tar-gz-full-copy",
     "best_public_score": "91.26",
     "compression_ratio": "3.2247",
     "runtime_bucket": "60-120s",
     "last_valid_submission_at": "2026-03-20T12:41:15+0700"
+  },
+  {
+    "rank": "3",
+    "team_name": "Antigravity",
+    "best_public_score": "91.26",
+    "compression_ratio": "3.2247",
+    "runtime_bucket": "60-120s",
+    "last_valid_submission_at": "2026-05-25T07:38:00+0300"
   }
 ]
