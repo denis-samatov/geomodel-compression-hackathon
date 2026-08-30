@@ -2,6 +2,42 @@
   <img src="./assets/best-choice.png" alt="Баннер GeoModel Compression Challenge" width="1060">
 </p>
 
+## GeoModel Compression Challenge — English summary
+
+> **Status: concluded** (challenge ran April 1 – May 15, 2026; leaderboard
+> finalized May 25, 2026). This repository is kept as a public reference —
+> the challenge is not accepting new submissions.
+
+This was the third hackathon challenge run at the *"Intelligent Data
+Analysis in the Oil and Gas Industry"* conference. Participants built a
+general-purpose compressor/decompressor for hydrodynamic reservoir model
+files under fixed technical requirements: take a model directory as input,
+compress it to a standardized artifact, decompress it back, and preserve the
+project structure — runnable unmarked in the organizers' evaluation
+environment.
+
+**Organizers:** [Геомодель](https://geomodel.ru/ds26) (organizational and
+expert platform), [тНавигатор / RFDynamics](https://rfdyn.com/software/)
+(technology partner — tNavigator software was used to inspect models and
+validate submissions), and the [Heriot-Watt TPU Center](https://hw.tpu.ru/)
+(educational and research support).
+
+**Final leaderboard:** 2 participating teams plus the baseline reference.
+Winner: **TomskPolitechnical**, score 97.40, 6.34× compression ratio. See
+[`leaderboard/current.csv`](leaderboard/current.csv) for the full table.
+
+**What's in this repository:** the official task specification, rules,
+technical submission requirements, evaluation logic, and a public leaderboard
+snapshot — see [`docs/`](docs/), [`baseline/`](baseline/) (a minimal valid
+reference solution), [`public_evaluator/`](public_evaluator/) (the local
+scoring tool), and [`starter-kit/`](starter-kit/) (a Docker environment for
+local testing).
+
+**Documentation is in Russian**, matching the participant audience, and is
+preserved as-is below and under `docs/` — this section is an orientation
+point for other readers, not a translation of it.
+
+---
 
 <table>
   <tr>
