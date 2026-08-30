@@ -1,0 +1,32 @@
+name: Test Baseline and Evaluator
+
+on:
+  push:
+    paths:
+      - "baseline/**"
+      - "public_evaluator/**"
+      - ".github/workflows/test-baseline-and-evaluator.yml"
+  pull_request:
+    paths:
+      - "baseline/**"
+      - "public_evaluator/**"
+      - ".github/workflows/test-baseline-and-evaluator.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Run baseline round-trip and evaluator metrics tests
+        run: python3 -m pytest baseline/tests public_evaluator/tests -v
