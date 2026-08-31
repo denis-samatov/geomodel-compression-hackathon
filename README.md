@@ -4,6 +4,8 @@
 
 ## GeoModel Compression Challenge — English summary
 
+[![CI](https://github.com/denis-samatov/geomodel-compression-hackathon/actions/workflows/test-baseline-and-evaluator.yml/badge.svg)](https://github.com/denis-samatov/geomodel-compression-hackathon/actions/workflows/test-baseline-and-evaluator.yml)
+
 > **Status: concluded** (challenge ran April 1 – May 15, 2026; leaderboard
 > finalized May 25, 2026). This repository is kept as a public reference —
 > the challenge is not accepting new submissions.
