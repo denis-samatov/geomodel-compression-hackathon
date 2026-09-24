@@ -1,0 +1,25 @@
+name: Проверка базового решения
+
+on:
+  push:
+    paths:
+      - "baseline/**"
+      - ".github/workflows/validate-baseline.yml"
+  pull_request:
+    paths:
+      - "baseline/**"
+      - ".github/workflows/validate-baseline.yml"
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Проверить распаковку и отказ для небезопасных архивов
+        run: python -m unittest discover -s baseline/tests -p 'test_*.py'
