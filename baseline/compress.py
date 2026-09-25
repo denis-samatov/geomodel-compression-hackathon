@@ -37,9 +37,14 @@ def main() -> int:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    paths = sorted(model_dir.rglob("*"))
+    for path in paths:
+        if path.is_symlink():
+            raise ValueError(f"символическая ссылка не поддерживается базовым решением: {path}")
+
     file_count = 0
     with tarfile.open(output_path, "w:gz") as archive:
-        for path in sorted(model_dir.rglob("*")):
+        for path in paths:
             if path.is_file():
                 archive.add(path, arcname=path.relative_to(model_dir))
                 file_count += 1
