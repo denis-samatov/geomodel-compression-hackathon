@@ -96,3 +96,6 @@ python public_evaluator/evaluate.py \
 - проверка является опциональной и не запускается без явного `--tnavigator-exe`;
 - она рассчитана на локальную среду с установленным tNavigator и используется как усиление структурной оценки и дополнительный gate;
 - если проверка включена и tNavigator не может открыть восстановленную модель или в `result.log` зафиксированы ошибки/проблемы, итоговый код завершения `evaluate.py` будет ненулевым.
+
+
+See [local contracts and hosted judging acceptance](../docs/local-validation-boundary.md).

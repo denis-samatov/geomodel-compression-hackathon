@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
+import os
+import signal
+import tempfile
 import subprocess
 import sys
 import time
@@ -99,35 +101,53 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Дополнительный флаг экспорта для tNavigator. Можно указывать несколько раз.",
     )
+    parser.add_argument("--command-timeout-seconds", type=float, default=3600,
+                        help="Timeout for each trusted local solution command.")
     return parser.parse_args()
 
 
-def run_command(command: list[str], log_path: Path) -> CommandResult:
+def run_command(command: list[str], log_path: Path, timeout_seconds: float = 3600) -> CommandResult:
+    """Run trusted local code with a timeout and bounded in-memory log excerpts.
+
+    This is not a hostile-submission sandbox. Hosted judging needs external isolation.
+    """
+    if timeout_seconds <= 0:
+        raise ValueError("command timeout must be positive")
     start = time.perf_counter()
-    completed = subprocess.run(command, capture_output=True, text=True)
-    duration = time.perf_counter() - start
-    log_path.write_text(
-        "\n".join(
-            [
-                f"КОМАНДА: {' '.join(command)}",
-                f"КОД_ВОЗВРАТА: {completed.returncode}",
-                "",
-                "STDOUT:",
-                completed.stdout,
-                "",
-                "STDERR:",
-                completed.stderr,
-            ]
-        ),
-        encoding="utf-8",
-    )
-    return CommandResult(
-        command=command,
-        exit_code=completed.returncode,
-        stdout=completed.stdout,
-        stderr=completed.stderr,
-        duration_seconds=round(duration, 4),
-    )
+    env = {key: os.environ[key] for key in ("PATH", "SYSTEMROOT", "WINDIR", "TMPDIR", "TEMP", "TMP")
+           if key in os.environ}
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+        process = subprocess.Popen(command, stdout=stdout, stderr=stderr,
+                                   stdin=subprocess.DEVNULL, env=env,
+                                   start_new_session=os.name == "posix")
+        try:
+            try:
+                process.wait(timeout=timeout_seconds)
+            except subprocess.TimeoutExpired as error:
+                raise TimeoutError(f"Command exceeded {timeout_seconds} seconds") from error
+        finally:
+            if os.name == "posix":
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            elif process.poll() is None:
+                process.kill()
+            process.wait()
+        stdout.seek(0)
+        stderr.seek(0)
+        out = stdout.read(1024 * 1024).decode("utf-8", errors="replace")
+        err = stderr.read(1024 * 1024).decode("utf-8", errors="replace")
+    duration = round(time.perf_counter() - start, 4)
+    log_path.write_text(f"COMMAND: {command!r}\nEXIT: {process.returncode}\n"
+                        f"STDOUT (up to 1 MiB):\n{out}\nSTDERR (up to 1 MiB):\n{err}",
+                        encoding="utf-8")
+    return CommandResult(command, process.returncode, out, err, duration)
+
+
+def _overlaps(left: Path, right: Path) -> bool:
+    return left.is_relative_to(right) or right.is_relative_to(left)
 
 
 def main() -> int:
@@ -137,11 +157,25 @@ def main() -> int:
     require_existing_directory(model_dir, "входная директория модели")
 
     workdir = Path(args.workdir).resolve()
+    if _overlaps(workdir, model_dir):
+        raise ValueError("workdir must not overlap the input model")
+    if args.command_timeout_seconds <= 0:
+        raise ValueError("command timeout must be positive")
     logs_dir = workdir / "logs"
-    logs_dir.mkdir(parents=True, exist_ok=True)
 
     archive_path = Path(args.archive).resolve() if args.archive else None
     restored_dir = Path(args.restored_model).resolve() if args.restored_model else None
+    if restored_dir is not None and _overlaps(restored_dir, model_dir):
+        raise ValueError("restored model must not overlap the original input")
+    if args.json_output:
+        json_output = Path(args.json_output).resolve()
+        protected = [model_dir, archive_path, restored_dir]
+        if args.solution_dir:
+            protected.append(Path(args.solution_dir).resolve())
+        if any(source is not None and _overlaps(json_output, source) for source in protected):
+            raise ValueError("JSON output must not overlap inputs or solution")
+    if not args.solution_dir and restored_dir is not None and _overlaps(workdir, restored_dir):
+        raise ValueError("workdir must not overlap the restored input")
     compress_result: CommandResult | None = None
     decompress_result: CommandResult | None = None
     tnavigator_check = None
@@ -150,6 +184,16 @@ def main() -> int:
     if args.solution_dir:
         solution_dir = Path(args.solution_dir).resolve()
         compress_script, decompress_script = require_solution_entrypoints(solution_dir)
+        if _overlaps(workdir, solution_dir):
+            raise ValueError("workdir must not overlap the solution")
+        for output in (archive_path, restored_dir, Path(args.json_output).resolve() if args.json_output else None):
+            if output is not None and any(_overlaps(output, source) for source in (model_dir, solution_dir)):
+                raise ValueError("output paths must not overlap model or solution")
+        if restored_dir is not None and restored_dir.exists():
+            raise FileExistsError("restored output must be a new directory; existing data is preserved")
+        if archive_path is not None and archive_path.exists():
+            raise FileExistsError("archive output must be a new file")
+        logs_dir.mkdir(parents=True, exist_ok=True)
 
         if archive_path is None:
             archive_path = workdir / "artifact.tar.gz"
@@ -157,10 +201,7 @@ def main() -> int:
             archive_path.parent.mkdir(parents=True, exist_ok=True)
 
         if restored_dir is None:
-            restored_dir = workdir / "restored_model"
-
-        if restored_dir.exists():
-            shutil.rmtree(restored_dir)
+            restored_dir = Path(tempfile.mkdtemp(prefix="restored-", dir=workdir))
 
         compress_command = [
             args.python_bin,
@@ -170,7 +211,7 @@ def main() -> int:
             "--output",
             str(archive_path),
         ]
-        compress_result = run_command(compress_command, logs_dir / "compress.log")
+        compress_result = run_command(compress_command, logs_dir / "compress.log", args.command_timeout_seconds)
         if compress_result.exit_code != 0:
             raise RuntimeError("compress.py завершился с ошибкой. Подробности смотрите в логах оценщика.")
 
@@ -182,7 +223,7 @@ def main() -> int:
             "--output",
             str(restored_dir),
         ]
-        decompress_result = run_command(decompress_command, logs_dir / "decompress.log")
+        decompress_result = run_command(decompress_command, logs_dir / "decompress.log", args.command_timeout_seconds)
         if decompress_result.exit_code != 0:
             raise RuntimeError("decompress.py завершился с ошибкой. Подробности смотрите в логах оценщика.")
     else:
@@ -191,6 +232,7 @@ def main() -> int:
                 "Укажите либо --solution-dir, либо сразу оба аргумента: --archive и --restored-model."
             )
 
+    logs_dir.mkdir(parents=True, exist_ok=True)
     require_existing_file(archive_path, "сжатый артефакт")
     ensure_restored_model_not_empty(restored_dir)
 
@@ -227,6 +269,10 @@ def main() -> int:
         tnavigator_final_status=tnavigator_check["final_status"] if tnavigator_check else None,
     )
     structure = structure_metrics.structure_integrity
+    if structure_metrics.root_data_score < 1.0 or structure_metrics.include_graph_score < 1.0:
+        validation_notes.append("required root DATA / INCLUDE graph structure is not preserved")
+    if structure_metrics.recall < 1.0:
+        validation_notes.append("required model paths are missing")
     exact = exact_match_ratio(original_manifest, restored_manifest, model_dir, restored_dir)
 
     compression_seconds = round(compress_result.duration_seconds, 4) if compress_result else None
@@ -254,6 +300,7 @@ def main() -> int:
 
     result = {
         "valid": not validation_notes,
+        "score_spec_version": "2.0-structural-gates",
         "model": str(model_dir),
         "archive": str(archive_path),
         "restored_model": str(restored_dir),

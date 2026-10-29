@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import tarfile
 from pathlib import Path
@@ -43,11 +44,19 @@ def main() -> int:
             raise ValueError(f"символическая ссылка не поддерживается базовым решением: {path}")
 
     file_count = 0
-    with tarfile.open(output_path, "w:gz") as archive:
-        for path in paths:
-            if path.is_file():
-                archive.add(path, arcname=path.relative_to(model_dir))
-                file_count += 1
+    with output_path.open("wb") as destination:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=destination, mtime=0) as compressed:
+            with tarfile.open(fileobj=compressed, mode="w", format=tarfile.PAX_FORMAT) as archive:
+                for path in paths:
+                    if path.is_file():
+                        info = archive.gettarinfo(str(path), arcname=path.relative_to(model_dir).as_posix())
+                        info.mtime = 0
+                        info.uid = info.gid = 0
+                        info.uname = info.gname = ""
+                        info.mode = 0o644
+                        with path.open("rb") as source:
+                            archive.addfile(info, source)
+                        file_count += 1
 
     metadata = {
         "baseline": "tar-gz-full-copy",

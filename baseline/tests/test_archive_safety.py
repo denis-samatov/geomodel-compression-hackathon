@@ -126,3 +126,61 @@ class ArchiveSafetyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ArchiveBudgetTests(unittest.TestCase):
+    def test_conflicting_file_and_directory_is_rejected_before_writing(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("decoder", DECOMPRESS)
+        decoder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(decoder)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            data = io.BytesIO()
+            with tarfile.open(fileobj=data, mode="w:gz") as archive:
+                for name in ("folder", "folder/file"):
+                    entry = tarfile.TarInfo(name)
+                    entry.size = 1
+                    archive.addfile(entry, io.BytesIO(b"x"))
+            data.seek(0)
+            restored = root / "out"
+            restored.mkdir()
+            with tarfile.open(fileobj=data, mode="r:gz") as archive:
+                with self.assertRaises(ValueError):
+                    decoder.extract_regular_files(archive, restored)
+            self.assertFalse(any(restored.iterdir()))
+
+    def test_expanded_budget_rejected_before_writing(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("decoder", DECOMPRESS)
+        decoder = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(decoder)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            data = io.BytesIO()
+            with tarfile.open(fileobj=data, mode="w:gz") as archive:
+                entry = tarfile.TarInfo("file")
+                entry.size = 3
+                archive.addfile(entry, io.BytesIO(b"abc"))
+            data.seek(0)
+            restored = root / "out"
+            restored.mkdir()
+            with tarfile.open(fileobj=data, mode="r:gz") as archive:
+                with self.assertRaises(ValueError):
+                    decoder.extract_regular_files(archive, restored, max_bytes=2)
+            self.assertFalse(any(restored.iterdir()))
+
+    def test_baseline_archive_bytes_do_not_depend_on_output_name(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            model = root / "model"
+            model.mkdir()
+            (model / "CASE.DATA").write_text("RUNSPEC\n")
+            hashes = []
+            for name in ("first.tar.gz", "second.tar.gz"):
+                output = root / name
+                result = run_script(COMPRESS, "--input", model, "--output", output)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                hashes.append(hashlib.sha256(output.read_bytes()).hexdigest())
+            self.assertEqual(hashes[0], hashes[1])
