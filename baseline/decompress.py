@@ -20,13 +20,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def extract_regular_files(archive: tarfile.TarFile, output_dir: Path) -> int:
+def extract_regular_files(archive: tarfile.TarFile, output_dir: Path,
+                          *, max_bytes: int = 100 * 1024**3, max_members: int = 100_000) -> int:
     """Restore baseline file entries without trusting paths or archive links."""
-    members = archive.getmembers()
+    output_dir = output_dir.resolve()
+    members = []
     seen: set[str] = set()
+    directories: set[str] = set()
+    expanded = 0
 
-    # Check every entry before writing so an invalid archive leaves no partial model.
-    for member in members:
+    # Validate every entry and aggregate budget before the first filesystem write.
+    for member in archive:
+        expanded += member.size
+        if len(members) >= max_members or expanded > max_bytes or member.size < 0:
+            raise ValueError("archive member/expanded-byte budget exceeded")
+        members.append(member)
         name = member.name
         parts = name.split("/")
         if (
@@ -39,6 +47,10 @@ def extract_regular_files(archive: tarfile.TarFile, output_dir: Path) -> int:
             or name in seen
         ):
             raise ValueError(f"недопустимая запись архива: {name!r}")
+        parents = {"/".join(parts[:index]) for index in range(1, len(parts))}
+        if name in directories or parents & seen:
+            raise ValueError(f"conflicting file/directory path: {name!r}")
+        directories.update(parents)
         target = output_dir.joinpath(*parts)
         if not target.resolve().is_relative_to(output_dir):
             raise ValueError(f"путь архива выходит за пределы каталога: {name!r}")
