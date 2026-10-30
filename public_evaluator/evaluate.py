@@ -101,16 +101,21 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Дополнительный флаг экспорта для tNavigator. Можно указывать несколько раз.",
     )
+    parser.add_argument("--allow-trusted-local-execution", action="store_true",
+                        help="Execute reviewed trusted solution scripts with host-user rights; not a sandbox.")
     parser.add_argument("--command-timeout-seconds", type=float, default=3600,
                         help="Timeout for each trusted local solution command.")
     return parser.parse_args()
 
 
-def run_command(command: list[str], log_path: Path, timeout_seconds: float = 3600) -> CommandResult:
+def run_command(command: list[str], log_path: Path, timeout_seconds: float = 3600,
+                *, trusted: bool = False) -> CommandResult:
     """Run trusted local code with a timeout and bounded in-memory log excerpts.
 
     This is not a hostile-submission sandbox. Hosted judging needs external isolation.
     """
+    if not trusted:
+        raise PermissionError("Explicit trusted local execution consent is required; untrusted code needs an OS sandbox")
     if timeout_seconds <= 0:
         raise ValueError("command timeout must be positive")
     start = time.perf_counter()
@@ -182,6 +187,8 @@ def main() -> int:
     validation_notes: list[str] = []
 
     if args.solution_dir:
+        if not args.allow_trusted_local_execution:
+            raise PermissionError("Use --allow-trusted-local-execution only for reviewed trusted scripts or inside an OS sandbox")
         solution_dir = Path(args.solution_dir).resolve()
         compress_script, decompress_script = require_solution_entrypoints(solution_dir)
         if _overlaps(workdir, solution_dir):
@@ -211,7 +218,7 @@ def main() -> int:
             "--output",
             str(archive_path),
         ]
-        compress_result = run_command(compress_command, logs_dir / "compress.log", args.command_timeout_seconds)
+        compress_result = run_command(compress_command, logs_dir / "compress.log", args.command_timeout_seconds, trusted=True)
         if compress_result.exit_code != 0:
             raise RuntimeError("compress.py завершился с ошибкой. Подробности смотрите в логах оценщика.")
 
@@ -223,7 +230,7 @@ def main() -> int:
             "--output",
             str(restored_dir),
         ]
-        decompress_result = run_command(decompress_command, logs_dir / "decompress.log", args.command_timeout_seconds)
+        decompress_result = run_command(decompress_command, logs_dir / "decompress.log", args.command_timeout_seconds, trusted=True)
         if decompress_result.exit_code != 0:
             raise RuntimeError("decompress.py завершился с ошибкой. Подробности смотрите в логах оценщика.")
     else:

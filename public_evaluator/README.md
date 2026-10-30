@@ -28,6 +28,7 @@
 ```bash
 python public_evaluator/evaluate.py \
   --model /path/to/public-model \
+  --allow-trusted-local-execution \
   --solution-dir /path/to/team-solution \
   --workdir /tmp/evaluator-run
 ```
@@ -37,6 +38,7 @@ python public_evaluator/evaluate.py \
 ```bash
 python public_evaluator/evaluate.py \
   --model /path/to/public-model \
+  --allow-trusted-local-execution \
   --solution-dir /path/to/team-solution \
   --workdir /tmp/evaluator-run \
   --tnavigator-exe "C:\Program Files\RFD\tNavigator\24.2\tNavigator-con.exe" \

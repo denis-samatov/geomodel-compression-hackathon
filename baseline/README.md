@@ -69,6 +69,7 @@ python baseline/decompress.py --input /tmp/artifact.tar.gz --output /tmp/restore
 ```bash
 python public_evaluator/evaluate.py \
   --model /path/to/public-model \
+  --allow-trusted-local-execution \
   --solution-dir baseline \
   --workdir /tmp/baseline-eval
 ```

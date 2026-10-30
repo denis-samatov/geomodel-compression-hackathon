@@ -91,7 +91,7 @@ docker run --rm \
     -v $(pwd)/../:/workspace \
     --network none \
     geomodel-judge \
-    /bin/bash -c "cd /workspace && python public_evaluator/evaluate.py --model /workspace/<path_to_public_model> --solution-dir /workspace/<path_to_team_solution>"
+    /bin/bash -c "cd /workspace && python public_evaluator/evaluate.py --model /workspace/<path_to_public_model> --allow-trusted-local-execution --solution-dir /workspace/<path_to_team_solution>"
 ```
 
 ## Проверки перед оценкой
@@ -111,3 +111,8 @@ docker run --rm \
 - отсутствуют критичные зависимости или конфигурации.
 
 Подробности про правила участия приведены в [rules.md](./rules.md), а информация про метрики и логику таблицы результатов — в [evaluation.md](./evaluation.md).
+
+Current execution policy: that command requires reviewed trusted solution code. The Docker
+starter image and a writable workspace mount do not constitute a qualified hostile-code sandbox.
+For unreviewed submissions, provision and verify a separate no-network/no-secret/read-only-input
+runtime with process, memory and disk limits before granting local execution consent.
