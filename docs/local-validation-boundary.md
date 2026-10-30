@@ -37,3 +37,8 @@ Record simulator version/platform and source-fixture SHA-256. Run one known-good
 missing-INCLUDE deck and one physically altered deck, keeping simulator status/logs separately
 from structural and tolerant-content metrics. Repeat after codec changes. A successful tar
 round-trip alone does not qualify physical reservoir simulation equivalence or private judging.
+
+Unacknowledged script execution is rejected before launching a process. For reviewed trusted
+local code only, pass `--allow-trusted-local-execution`; the low-level Python runner similarly
+requires `trusted=True`. This acknowledgement grants host-user privileges and does not sandbox
+a submission. Artifact-only checking requires neither execution acknowledgement nor a simulator.

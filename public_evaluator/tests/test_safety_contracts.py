@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def run_cli(*arguments):
     return subprocess.run([sys.executable, str(ROOT / "public_evaluator/evaluate.py"),
-                           *map(str, arguments)], capture_output=True, text=True)
+                           "--allow-trusted-local-execution", *map(str, arguments)], capture_output=True, text=True)
 
 
 def test_missing_root_and_includes_is_invalid(tmp_path):
@@ -61,7 +61,7 @@ def test_existing_restored_content_is_preserved(tmp_path):
 def test_command_timeout_is_bounded(tmp_path):
     with pytest.raises(TimeoutError):
         run_command([sys.executable, "-c", "import time; time.sleep(30)"],
-                    tmp_path / "timeout.log", timeout_seconds=.1)
+                    tmp_path / "timeout.log", timeout_seconds=.1, trusted=True)
 
 
 def test_artifact_json_cannot_overwrite_input_model(tmp_path):
@@ -77,3 +77,29 @@ def test_artifact_json_cannot_overwrite_input_model(tmp_path):
                    "--json-output", sentinel, "--workdir", tmp_path / "work")
     assert proc.returncode != 0
     assert sentinel.read_text() == "RUNSPEC\n"
+
+
+def test_command_denies_unacknowledged_code_before_execution(tmp_path):
+    marker = tmp_path / "executed"
+    with pytest.raises(PermissionError, match="trusted"):
+        run_command([sys.executable, "-c", f"from pathlib import Path;Path({str(marker)!r}).touch()"],
+                    tmp_path / "run.log")
+    assert not marker.exists()
+
+
+def test_cli_rejects_unacknowledged_solution_before_side_effects(tmp_path):
+    model, solution = tmp_path / "model", tmp_path / "solution"
+    model.mkdir()
+    solution.mkdir()
+    (model / "CASE.DATA").write_text("RUNSPEC\n")
+    marker = tmp_path / "executed"
+    for name in ("compress.py", "decompress.py"):
+        (solution / name).write_text(f"from pathlib import Path;Path({str(marker)!r}).touch()")
+    workdir = tmp_path / "work"
+    proc = subprocess.run([sys.executable, str(ROOT / "public_evaluator/evaluate.py"),
+                           "--model", str(model), "--solution-dir", str(solution),
+                           "--workdir", str(workdir)], capture_output=True, text=True)
+    assert proc.returncode != 0
+    assert "allow-trusted-local-execution" in proc.stderr
+    assert not marker.exists()
+    assert not workdir.exists()

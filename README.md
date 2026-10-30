@@ -39,6 +39,24 @@ local testing).
 preserved as-is below and under `docs/` — this section is an orientation
 point for other readers, not a translation of it.
 
+## Local verification and code trust
+
+The evaluator reads existing archives/restored trees without executing a solution. Executing
+`compress.py`/`decompress.py` is disabled unless the operator explicitly supplies
+`--allow-trusted-local-execution`. Use this only for reviewed trusted scripts or inside a
+separately qualified OS sandbox. No hosted/no-network/memory/disk isolation is provided here;
+timeouts and process-group cleanup are resource controls, not an untrusted-submission boundary.
+
+```bash
+python -m pip install pytest
+python -m pytest baseline/tests public_evaluator/tests -q
+python public_evaluator/evaluate.py --model /path/to/input \
+  --solution-dir baseline --allow-trusted-local-execution --workdir /path/to/fresh-work
+```
+
+The tests use tiny authored decks and reviewed baseline scripts. They establish structural and
+path-preservation contracts, not tNavigator/physical model acceptance or hosted judging safety.
+
 ---
 
 <table>

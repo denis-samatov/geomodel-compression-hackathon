@@ -40,6 +40,7 @@ def test_baseline_scores_perfectly_via_evaluator(tmp_path):
             str(EVALUATE_SCRIPT),
             "--model",
             str(model_dir),
+            "--allow-trusted-local-execution",
             "--solution-dir",
             str(BASELINE_DIR),
             "--workdir",

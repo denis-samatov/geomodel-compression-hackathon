@@ -12,6 +12,6 @@ python -m unittest discover -s baseline/tests -p 'test_*.py'
 
 1. Запустить `compress.py` на небольшой модели.
 2. Запустить `decompress.py` на полученном артефакте.
-3. Прогнать `public_evaluator/evaluate.py` с `--solution-dir baseline`.
+3. Прогнать `public_evaluator/evaluate.py` с `--allow-trusted-local-execution --solution-dir baseline`.
 
 Если эти три шага проходят успешно, базовое решение выполняет свою роль корректно.
